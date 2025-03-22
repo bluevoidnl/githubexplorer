@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class GetGithubDataUsecase(val gitHubDataRemoteRepository: GitHubDataRemoteRepository) {
 
-    private val data = MutableStateFlow<List<Repository>>(emptyList())
+    private val data = MutableStateFlow<Result<List<Repository>>>(Result.success(emptyList()))
 
     // Returns a flow that emits user data whenever there’s an update
-    operator fun invoke(): Flow<List<Repository>> {
+    operator fun invoke(): Flow<Result<List<Repository>>> {
         fetchData()
         return data
     }

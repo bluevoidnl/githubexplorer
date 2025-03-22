@@ -2,6 +2,7 @@ package nl.bluevoid.githubexplorer
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import java.io.IOException
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
@@ -23,21 +24,16 @@ class ViewmodelTest {
 
     @Before
     fun setup() {
-        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(TEST_ITEMS)
+        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(Result.success(TEST_ITEMS))
     }
 
     @Test
-    fun `when initialized then viewmodel should return overview loading`() = runTest {
+    fun `when initialized then viewmodel should return overview loading`() {
         // Given
         val vm = getViewModel()
 
         // Then
-        vm.uiState.testFlow {
-            val value = awaitItem()
-            assertTrue(value is UiState.OverviewLoading)
-            // Skip the next event where the list of items is delivered to the overview
-            skipItems(1)
-        }
+        assertTrue( vm.uiState.value is UiState.Overview.OverviewLoading)
     }
 
     @Test
@@ -47,13 +43,31 @@ class ViewmodelTest {
 
         // When
         // wait till non empty list of items is received
-        val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview }
+        val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview.OverviewItems }
 
         // Then
         flowWithOverviewData.testFlow {
             val value = awaitItem()
-            val items = (value as UiState.Overview).items
+            val items = (value as UiState.Overview.OverviewItems).items
             assertTrue(items == TEST_ITEMS)
+        }
+    }
+
+    @Test
+    fun `when data retrieval fails then viewmodel should return loading error state`() = runTest {
+        // Given
+        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(Result.failure(IOException("In outer space")))
+        val vm = getViewModel()
+
+        // When
+
+        // wait till error is received
+        val flowWithOverviewError = vm.uiState.filter { it is UiState.Overview.OverviewLoadingError }
+
+        // Then
+        flowWithOverviewError.testFlow {
+            val value = awaitItem()
+            assertTrue(value is UiState.Overview.OverviewLoadingError)
         }
     }
 
@@ -88,7 +102,7 @@ class ViewmodelTest {
             val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview }
             flowWithOverviewData.testFlow {
                 val value = awaitItem()
-                val items = (value as UiState.Overview).items
+                val items = (value as UiState.Overview.OverviewItems).items
                 assertTrue(items == TEST_ITEMS)
             }
         }

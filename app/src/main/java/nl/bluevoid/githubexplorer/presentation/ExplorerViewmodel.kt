@@ -14,12 +14,14 @@ class ExplorerViewmodel(getGithubDataUsecase: GetGithubDataUsecase) : ViewModel(
 
     private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 
-    val uiState = combine(getGithubDataUsecase.invoke(), selectedRepositoryFlow) { repositories, selected ->
+    val uiState = combine(getGithubDataUsecase.invoke(), selectedRepositoryFlow) { repositoriesLoadResult, selected ->
+        val repositories = repositoriesLoadResult.getOrNull() ?: emptyList()
         when {
-            selected == null -> UiState.Overview(repositories)
+            repositoriesLoadResult.isFailure -> UiState.Overview.OverviewLoadingError
+            selected == null -> UiState.Overview.OverviewItems(repositories)
             else -> getSelectedState(repositories, selected)
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.OverviewLoading)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Overview.OverviewLoading)
 
     private fun getSelectedState(
         repositories: List<Repository>,
@@ -30,7 +32,7 @@ class ExplorerViewmodel(getGithubDataUsecase: GetGithubDataUsecase) : ViewModel(
         return if (repository == null) {
             // data was updated and repository was not present any more (deleted?)
             // todo: (out of scope for now) discuss with PO & notify user that repository is not available anymore
-            UiState.Overview(repositories)
+            UiState.Overview.OverviewItems(repositories)
         } else {
             UiState.Detail(repository)
         }
