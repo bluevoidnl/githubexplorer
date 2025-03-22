@@ -22,7 +22,7 @@ class ViewmodelTest {
     private val gitHubUsecase: GetGithubDataUsecase = mockk()
 
     @Before
-    fun setup(){
+    fun setup() {
         coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(TEST_ITEMS)
     }
 
@@ -35,6 +35,8 @@ class ViewmodelTest {
         vm.uiState.testFlow {
             val value = awaitItem()
             assertTrue(value is UiState.Overview)
+            // Skip the next event where the list of items is delivered to the overview
+            skipItems(1)
         }
     }
 
@@ -69,6 +71,25 @@ class ViewmodelTest {
                 val value = awaitItem()
                 val selectedRepository = (value as UiState.Detail).selectedRepository
                 assertTrue(selectedRepository == REPOSITORY_2)
+            }
+        }
+
+    @Test
+    fun `given a user views details when details are closed then viewmodel returns the overview uiState`() =
+        runTest {
+            // Given
+            val vm = getViewModel()
+            vm.showDetails(REPOSITORY_2.id)
+
+            // When
+            vm.closeDetails()
+
+            // Then
+            val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview }
+            flowWithOverviewData.testFlow {
+                val value = awaitItem()
+                val items = (value as UiState.Overview).items
+                assertTrue(items == TEST_ITEMS)
             }
         }
 
