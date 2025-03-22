@@ -1,4 +1,4 @@
-package nl.bluevoid.githubexplorer.ui.theme
+package nl.bluevoid.githubexplorer.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
