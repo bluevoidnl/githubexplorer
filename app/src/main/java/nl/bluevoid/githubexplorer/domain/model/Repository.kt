@@ -1,7 +1,7 @@
 package nl.bluevoid.githubexplorer.domain.model
 
 data class Repository(
-    val id: Long,
+    val id: RepositoryId,
     val name: String,
     val fullName: String,
     val description: String,
@@ -19,6 +19,9 @@ data class Repository(
      */
     val isPublic = visibility != Visibility.Public
 }
+
+@JvmInline
+value class RepositoryId(val id: Long)
 
 enum class Visibility {
     Public, Private, Internal

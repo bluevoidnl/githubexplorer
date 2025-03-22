@@ -3,11 +3,13 @@ package nl.bluevoid.githubexplorer
 import io.mockk.coEvery
 import io.mockk.mockk
 import nl.bluevoid.githubexplorer.domain.model.Repository
+import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.domain.usecase.GetGithubDataUsecase
 import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
 import nl.bluevoid.githubexplorer.presentation.UiState
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
@@ -19,25 +21,56 @@ class ViewmodelTest {
     // Mock Repository
     private val gitHubUsecase: GetGithubDataUsecase = mockk()
 
+    @Before
+    fun setup(){
+        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(TEST_ITEMS)
+    }
+
     @Test
-    fun `when initialized then viewmodel should return overview`() {
+    fun `when initialized then viewmodel should return overview`() = runTest {
+        // Given
         val vm = getViewModel()
-        assertTrue(vm.uiState.value is UiState.Overview)
+
+        // Then
+        vm.uiState.testFlow {
+            val value = awaitItem()
+            assertTrue(value is UiState.Overview)
+        }
     }
 
     @Test
     fun `when initialized then viewmodel should retrieve overview data`() = runTest {
-
-        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(TEST_ITEMS)
+        // Given
         val vm = getViewModel()
 
+        // When
         // wait till non empty list of items is received
-        vm.uiState.filter { it is UiState.Overview && it.items.isNotEmpty() }.testFlow {
+        val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview && it.items.isNotEmpty() }
+
+        // Then
+        flowWithOverviewData.testFlow {
             val value = awaitItem()
             val items = (value as UiState.Overview).items
             assertTrue(items == TEST_ITEMS)
         }
     }
+
+    @Test
+    fun `when a user selects a repository then viewmodel returns the details uiState with the correct details `() =
+        runTest {
+            // Given
+            val vm = getViewModel()
+
+            // When
+            vm.showDetails(REPOSITORY_2.id)
+
+            // Then
+            vm.uiState.filter { it is UiState.Detail }.testFlow {
+                val value = awaitItem()
+                val selectedRepository = (value as UiState.Detail).selectedRepository
+                assertTrue(selectedRepository == REPOSITORY_2)
+            }
+        }
 
     private fun getViewModel(): ExplorerViewmodel {
         return ExplorerViewmodel(gitHubUsecase)
@@ -46,7 +79,7 @@ class ViewmodelTest {
     companion object {
 
         private val REPOSITORY_1 = Repository(
-            id = 1,
+            id = RepositoryId(1),
             name = "1",
             fullName = "One for real",
             description = "One for real",
@@ -56,7 +89,7 @@ class ViewmodelTest {
         )
 
         private val REPOSITORY_2 = Repository(
-            id = 2,
+            id = RepositoryId(2),
             name = "2",
             fullName = "Two for real",
             description = "Two for real",
