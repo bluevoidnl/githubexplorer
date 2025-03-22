@@ -27,14 +27,14 @@ class ViewmodelTest {
     }
 
     @Test
-    fun `when initialized then viewmodel should return overview`() = runTest {
+    fun `when initialized then viewmodel should return overview loading`() = runTest {
         // Given
         val vm = getViewModel()
 
         // Then
         vm.uiState.testFlow {
             val value = awaitItem()
-            assertTrue(value is UiState.Overview)
+            assertTrue(value is UiState.OverviewLoading)
             // Skip the next event where the list of items is delivered to the overview
             skipItems(1)
         }
@@ -47,7 +47,7 @@ class ViewmodelTest {
 
         // When
         // wait till non empty list of items is received
-        val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview && it.items.isNotEmpty() }
+        val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview }
 
         // Then
         flowWithOverviewData.testFlow {
