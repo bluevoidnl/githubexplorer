@@ -1,13 +1,17 @@
 package nl.bluevoid.githubexplorer.presentation
 
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
-import nl.bluevoid.githubexplorer.domain.util.ResultState
 import nl.bluevoid.githubexplorer.domain.usecase.GetGithubRepositoriesUsecase
+import nl.bluevoid.githubexplorer.domain.util.ResultState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
@@ -27,6 +31,9 @@ class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesU
             }
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Overview.OverviewLoading)
+
+    private val _navigationEvents = MutableSharedFlow<NavigationEvent>(extraBufferCapacity = 1)
+    val navigationEvents = _navigationEvents.asSharedFlow()
 
     private fun getSelectedState(
         repositories: List<Repository>,
@@ -56,6 +63,15 @@ class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesU
     }
 
     override fun openInBrowser(repository: Repository) {
-        TODO("Not yet implemented")
+        try {
+            _navigationEvents.tryEmit(NavigationEvent.OpenInAppBrowser(repository.repositoryLink.toUri()))
+        } catch (e: Exception) {
+            // todo handle incorrect urls
+            e.printStackTrace()
+        }
     }
+}
+
+sealed interface NavigationEvent {
+    data class OpenInAppBrowser(val url: Uri) : NavigationEvent
 }

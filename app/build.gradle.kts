@@ -61,6 +61,7 @@ dependencies {
 
     // Logging (Optional, for debugging requests)
     implementation(libs.ktor.client.logging)
+    implementation(libs.androidx.browser)
 
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
