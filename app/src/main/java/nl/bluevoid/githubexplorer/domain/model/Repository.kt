@@ -4,8 +4,8 @@ data class Repository(
     val id: RepositoryId,
     val name: String,
     val fullName: String,
-    val description: String,
-    val ownerAvatarUrl: String,
+    val description: String? = null,
+    val ownerAvatarUrl: String? = null,
     val visibility: Visibility,
     val repositoryLink: String
 ) {
@@ -24,5 +24,5 @@ data class Repository(
 value class RepositoryId(val id: Long)
 
 enum class Visibility {
-    Public, Private, Internal
+    Public, Private, Internal, Unknown
 }
