@@ -6,13 +6,13 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
 
-class Application : Application() {
+class GithubApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
         // Start Koin
         startKoin {
-            androidContext(this@Application)
+            androidContext(this@GithubApplication)
             modules(appModule) // Load your Koin module
         }
     }

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -46,20 +47,32 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    // Ktor Core and Client
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android) // For Android
+
+    // JSON Serialization
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+
+    // Logging (Optional, for debugging requests)
+    implementation(libs.ktor.client.logging)
+
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.turbine)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
-
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.androidx.core.testing)
-    testImplementation(libs.turbine)
 }

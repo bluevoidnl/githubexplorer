@@ -7,11 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
+import nl.bluevoid.githubexplorer.presentation.ui.GitHubDetailView
+import nl.bluevoid.githubexplorer.presentation.ui.GitHubOverView
+import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -25,9 +27,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             GithubExplorerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+
+                    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+                    GitHubView(
+                        modifier = Modifier.padding(innerPadding),
+                        uiState
                     )
                 }
             }
@@ -36,17 +40,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    GithubExplorerTheme {
-        Greeting("Android")
+fun GitHubView(modifier: Modifier = Modifier, uiState: UiState) {
+    when (uiState) {
+        is UiState.Overview -> GitHubOverView(uiState)
+        is UiState.Detail -> GitHubDetailView(uiState)
     }
 }
