@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,9 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
+import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.GitHubDetailView
 import nl.bluevoid.githubexplorer.presentation.ui.GitHubOverView
-import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -30,7 +31,9 @@ class MainActivity : ComponentActivity() {
 
                     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
                     GitHubView(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
                         uiState
                     )
                 }
@@ -41,8 +44,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GitHubView(modifier: Modifier = Modifier, uiState: UiState) {
-    when (uiState) {
-        is UiState.Overview -> GitHubOverView(uiState)
-        is UiState.Detail -> GitHubDetailView(uiState)
+    Box(
+        modifier = modifier
+    ) {
+        when (uiState) {
+            is UiState.Overview -> GitHubOverView(uiState = uiState)
+            is UiState.Detail -> GitHubDetailView(uiState = uiState)
+        }
     }
 }

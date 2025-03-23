@@ -5,6 +5,7 @@ import io.mockk.mockk
 import java.io.IOException
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.util.ResultState
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.domain.usecase.GetGithubDataUsecase
 import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
@@ -24,7 +25,7 @@ class ViewmodelTest {
 
     @Before
     fun setup() {
-        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(Result.success(TEST_ITEMS))
+        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(ResultState.Success(TEST_ITEMS))
     }
 
     @Test
@@ -33,7 +34,7 @@ class ViewmodelTest {
         val vm = getViewModel()
 
         // Then
-        assertTrue( vm.uiState.value is UiState.Overview.OverviewLoading)
+        assertTrue(vm.uiState.value is UiState.Overview.OverviewLoading)
     }
 
     @Test
@@ -56,7 +57,8 @@ class ViewmodelTest {
     @Test
     fun `when data retrieval fails then viewmodel should return loading error state`() = runTest {
         // Given
-        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(Result.failure(IOException("In outer space")))
+        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(ResultState.Failure(IOException("In outer space")))
+
         val vm = getViewModel()
 
         // When
@@ -99,7 +101,7 @@ class ViewmodelTest {
             vm.closeDetails()
 
             // Then
-            val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview }
+            val flowWithOverviewData = vm.uiState.filter { it is UiState.Overview.OverviewItems }
             flowWithOverviewData.testFlow {
                 val value = awaitItem()
                 val items = (value as UiState.Overview.OverviewItems).items

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.util.ResultState
 import nl.bluevoid.githubexplorer.domain.usecase.GetGithubDataUsecase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,11 +16,13 @@ class ExplorerViewmodel(getGithubDataUsecase: GetGithubDataUsecase) : ViewModel(
     private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 
     val uiState = combine(getGithubDataUsecase.invoke(), selectedRepositoryFlow) { repositoriesLoadResult, selected ->
-        val repositories = repositoriesLoadResult.getOrNull() ?: emptyList()
-        when {
-            repositoriesLoadResult.isFailure -> UiState.Overview.OverviewLoadingError
-            selected == null -> UiState.Overview.OverviewItems(repositories)
-            else -> getSelectedState(repositories, selected)
+        when (repositoriesLoadResult) {
+            is ResultState.Loading -> UiState.Overview.OverviewLoading
+            is ResultState.Failure -> UiState.Overview.OverviewLoadingError
+            is ResultState.Success -> {
+                if (selected == null) UiState.Overview.OverviewItems(repositoriesLoadResult.data)
+                else getSelectedState(repositoriesLoadResult.data, selected)
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Overview.OverviewLoading)
 
@@ -31,7 +34,7 @@ class ExplorerViewmodel(getGithubDataUsecase: GetGithubDataUsecase) : ViewModel(
         val repository = repositories.firstOrNull { it.id == selected }
         return if (repository == null) {
             // data was updated and repository was not present any more (deleted?)
-            // todo: (out of scope for now) discuss with PO & notify user that repository is not available anymore
+            // todo: see techdebt.MD. discuss with PO: notify user that repository is not available anymore?
             UiState.Overview.OverviewItems(repositories)
         } else {
             UiState.Detail(repository)
