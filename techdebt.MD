@@ -6,3 +6,5 @@ be shown after data is updated
 the page limit of 100. At this moment abnamrocoesd has 35 repositories. 
 - use StringResources for strings in the UI to support multiple languages 
 - handle malformed urls in ExplorerViewModel.openInBrowser()
+- no unittest for openInBrowser()
+- 

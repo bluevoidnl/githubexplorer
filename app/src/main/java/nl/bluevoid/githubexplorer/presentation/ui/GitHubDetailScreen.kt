@@ -3,6 +3,7 @@ package nl.bluevoid.githubexplorer.presentation.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -18,13 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.presentation.RepositoryDetailViewInteractor
 import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +61,7 @@ fun GitHubDetailView(
                 .padding(16.dp),
         ) {
             with(repository) {
+                AvatarImage(ownerAvatarUrl)
                 Text("Full name: $fullName")
                 Text("Description: ${description ?: ""}")
                 Text("Is public: $isPublic")
@@ -71,6 +73,15 @@ fun GitHubDetailView(
             }
         }
     }
+}
+
+@Composable
+fun AvatarImage(imageUrl: String) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = "Avator image",
+        modifier = Modifier.size(150.dp)
+    )
 }
 
 @Preview(showBackground = true)
@@ -91,7 +102,6 @@ fun GitHubDetailPreview() {
         )
     }
 }
-
 
 private val DummyInteraction = object : RepositoryDetailViewInteractor {
     override fun closeDetails() = Unit

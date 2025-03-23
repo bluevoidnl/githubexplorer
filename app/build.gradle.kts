@@ -51,17 +51,14 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
 
-    // Ktor Core and Client
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.android) // For Android
-
-    // JSON Serialization
+    implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
-
-    // Logging (Optional, for debugging requests)
     implementation(libs.ktor.client.logging)
     implementation(libs.androidx.browser)
+    implementation(libs.coil.compose)
+
 
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
