@@ -1,13 +1,15 @@
 package nl.bluevoid.githubexplorer
 
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.io.IOException
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
-import nl.bluevoid.githubexplorer.domain.util.ResultState
 import nl.bluevoid.githubexplorer.domain.model.Visibility
-import nl.bluevoid.githubexplorer.domain.usecase.GetGithubDataUsecase
+import nl.bluevoid.githubexplorer.domain.usecase.GetGithubRepositoriesUsecase
+import nl.bluevoid.githubexplorer.domain.util.ResultState
 import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
 import nl.bluevoid.githubexplorer.presentation.UiState
 import org.junit.Assert.assertTrue
@@ -21,11 +23,11 @@ import app.cash.turbine.test as testFlow
 class ViewmodelTest {
 
     // Mock Repository
-    private val gitHubUsecase: GetGithubDataUsecase = mockk()
+    private val gitHubUseCase = mockk<GetGithubRepositoriesUsecase>()
 
     @Before
     fun setup() {
-        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(ResultState.Success(TEST_ITEMS))
+        coEvery { gitHubUseCase.invoke() } returns MutableStateFlow(ResultState.Success(TEST_ITEMS))
     }
 
     @Test
@@ -57,7 +59,7 @@ class ViewmodelTest {
     @Test
     fun `when data retrieval fails then viewmodel should return loading error state`() = runTest {
         // Given
-        coEvery { gitHubUsecase.invoke() } returns MutableStateFlow(ResultState.Failure(IOException("In outer space")))
+        coEvery { gitHubUseCase.invoke() } returns MutableStateFlow(ResultState.Failure(IOException("In outer space")))
 
         val vm = getViewModel()
 
@@ -71,6 +73,22 @@ class ViewmodelTest {
             val value = awaitItem()
             assertTrue(value is UiState.Overview.OverviewLoadingError)
         }
+    }
+
+    @Test
+    fun `Given data retrieval failed when user reloads then usecase should reload data`() {
+        // Given
+        coEvery { gitHubUseCase.invoke() } returns MutableStateFlow(ResultState.Failure(IOException("In outer space")))
+        every { gitHubUseCase.fetchData() } returns Unit
+        val vm = getViewModel()
+        // wait till error is received
+        // val flowWithOverviewError = vm.uiState.filter { it is UiState.Overview.OverviewLoadingError }
+
+        // When
+        vm.onRetryLoading()
+
+        // Then
+        verify(exactly = 1) { gitHubUseCase.fetchData() }
     }
 
     @Test
@@ -110,7 +128,7 @@ class ViewmodelTest {
         }
 
     private fun getViewModel(): ExplorerViewmodel {
-        return ExplorerViewmodel(gitHubUsecase)
+        return ExplorerViewmodel(gitHubUseCase)
     }
 
     companion object {

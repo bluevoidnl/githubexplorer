@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class GetGithubDataUsecase(val gitHubDataRemoteRepository: GitHubDataRemoteRepository) {
+class GetGithubRepositoriesUsecase(val gitHubDataRemoteRepository: GitHubDataRemoteRepository) {
 
     private val data = MutableStateFlow<ResultState<List<Repository>>>(ResultState.Loading)
 
@@ -22,8 +22,9 @@ class GetGithubDataUsecase(val gitHubDataRemoteRepository: GitHubDataRemoteRepos
         return data
     }
 
-    private fun fetchData() {
+    fun fetchData() {
         scope.launch {
+            data.value = ResultState.Loading
             val result = gitHubDataRemoteRepository.getGitHubRepositories()
             data.value = result.toResultState()
         }

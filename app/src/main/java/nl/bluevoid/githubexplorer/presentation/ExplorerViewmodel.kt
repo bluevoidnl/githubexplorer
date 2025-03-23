@@ -5,13 +5,15 @@ import androidx.lifecycle.viewModelScope
 import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.util.ResultState
-import nl.bluevoid.githubexplorer.domain.usecase.GetGithubDataUsecase
+import nl.bluevoid.githubexplorer.domain.usecase.GetGithubRepositoriesUsecase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-class ExplorerViewmodel(getGithubDataUsecase: GetGithubDataUsecase) : ViewModel() {
+class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesUsecase) : ViewModel(),
+    OverviewScreenInteractor,
+    RepositoryDetailViewInteractor {
 
     private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 
@@ -41,11 +43,19 @@ class ExplorerViewmodel(getGithubDataUsecase: GetGithubDataUsecase) : ViewModel(
         }
     }
 
-    fun showDetails(id: RepositoryId) {
+    override fun onRetryLoading() {
+        getGithubDataUsecase.fetchData()
+    }
+
+    override fun showDetails(id: RepositoryId) {
         selectedRepositoryFlow.value = id
     }
 
-    fun closeDetails() {
+    override fun closeDetails() {
         selectedRepositoryFlow.value = null
+    }
+
+    override fun openInBrowser(repository: Repository) {
+        TODO("Not yet implemented")
     }
 }

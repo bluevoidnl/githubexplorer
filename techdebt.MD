@@ -4,4 +4,4 @@
 be shown after data is updated
 - pagination is not supported, it should support this in the future when the abnamrocoesd exceeds
 the page limit of 100. At this moment abnamrocoesd has 35 repositories. 
-
+- use StringResources for strings in the UI to support multiple languages 
