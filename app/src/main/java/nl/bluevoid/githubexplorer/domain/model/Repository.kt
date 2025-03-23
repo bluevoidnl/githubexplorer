@@ -9,12 +9,12 @@ data class Repository(
     val visibility: Visibility,
     val repositoryLink: String
 ) {
-    val isPublic = visibility != Visibility.Public
+    val isPublic = visibility == Visibility.PUBLIC
 }
 
 @JvmInline
 value class RepositoryId(val id: Long)
 
 enum class Visibility {
-    Public, Private, Internal, Unknown
+    PUBLIC, PRIVATE, INTERNAL, UNKNOWN
 }

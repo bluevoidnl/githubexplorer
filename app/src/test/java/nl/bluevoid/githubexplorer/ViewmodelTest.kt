@@ -139,7 +139,7 @@ class ViewmodelTest {
             fullName = "One for real",
             description = "One for real",
             ownerAvatarUrl = "ownerAvatarUrlOne",
-            visibility = Visibility.Public,
+            visibility = Visibility.PUBLIC,
             repositoryLink = "https://github.com/one"
         )
 
@@ -149,7 +149,7 @@ class ViewmodelTest {
             fullName = "Two for real",
             description = "Two for real",
             ownerAvatarUrl = "ownerAvatarUrlTwo",
-            visibility = Visibility.Private,
+            visibility = Visibility.PRIVATE,
             repositoryLink = "https://github.com/two"
         )
 

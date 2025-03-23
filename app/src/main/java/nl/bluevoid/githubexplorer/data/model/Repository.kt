@@ -17,9 +17,10 @@ data class Repository(
 ) {
     fun toDomainRepository(): DomainRepository {
         val visEnum = try {
-            Visibility.valueOf(visibility)
+            Visibility.valueOf(visibility.uppercase())
         } catch (e: Exception) {
-            Visibility.Unknown
+            println("RRR unknown: $visibility")
+            Visibility.UNKNOWN
         }
 
         return DomainRepository(

@@ -1,6 +1,7 @@
 package nl.bluevoid.githubexplorer.presentation.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import nl.bluevoid.githubexplorer.domain.model.Repository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteractor
 import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
@@ -81,11 +85,19 @@ fun GitHubListView(
     modifier: Modifier = Modifier, uiState: UiState.Overview.OverviewItems,
     overviewScreenInteractor: OverviewScreenInteractor
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         itemsIndexed(uiState.items) { index, repository ->
-            Row(modifier = Modifier.clickable { overviewScreenInteractor.showDetails(repository.id) }) {
-                Text("${index + 1}")
-                Text(" ${repository.name}")
+            Row(modifier = Modifier.clickable { overviewScreenInteractor.showDetails(repository.id) },
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                with(repository) {
+                    AvatarImage(imageUrl = ownerAvatarUrl, size = 80.dp)
+                    Column {
+                        Text("${index + 1}. $name")
+                        Text("Visibility: ${visibility.name.lowercase()}")
+                        Text("Is public: $isPublic")
+                    }
+                }
             }
         }
     }
@@ -113,6 +125,37 @@ fun GitHubOverViewErrorPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun GitHubListViewPreview() {
+    GithubExplorerTheme {
+        GitHubListView(
+            uiState = UiState.Overview.OverviewItems(listOf(repository, repository2)),
+            overviewScreenInteractor = DummyInteraction
+        )
+    }
+}
+
+private val repository = Repository(
+    id = RepositoryId(1),
+    name = "encrypted-push-notification",
+    fullName = "adnamrocoesd/encrypted-push-notification",
+    description = "Though shall not read my notifications!",
+    ownerAvatarUrl = "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
+    visibility = Visibility.PUBLIC,
+    repositoryLink = "https://github.com/abnamrocoesd/encrypted-push-notification"
+)
+
+private val repository2 = Repository(
+    id = RepositoryId(2),
+    name = "external-storage",
+    fullName = "adnamrocoesd/external-storage",
+    description = "",
+    ownerAvatarUrl = "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
+    visibility = Visibility.PUBLIC,
+    repositoryLink = "https://github.com/abnamrocoesd/external-storage"
+)
 
 private val DummyInteraction = object : OverviewScreenInteractor {
     override fun onRetryLoading() = Unit

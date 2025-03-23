@@ -18,6 +18,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import nl.bluevoid.githubexplorer.domain.model.Repository
@@ -61,11 +62,11 @@ fun GitHubDetailView(
                 .padding(16.dp),
         ) {
             with(repository) {
-                AvatarImage(ownerAvatarUrl)
+                AvatarImage(imageUrl = ownerAvatarUrl, size = 150.dp)
                 Text("Full name: $fullName")
                 Text("Description: ${description ?: ""}")
                 Text("Is public: $isPublic")
-                Text("Visibility: ${visibility.name}")
+                Text("Visibility: ${visibility.name.lowercase()}")
 
                 Button(onClick = { interactor.openInBrowser(repository) }) {
                     Text("View repository")
@@ -73,15 +74,6 @@ fun GitHubDetailView(
             }
         }
     }
-}
-
-@Composable
-fun AvatarImage(imageUrl: String) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = "Avator image",
-        modifier = Modifier.size(150.dp)
-    )
 }
 
 @Preview(showBackground = true)
@@ -93,7 +85,7 @@ fun GitHubDetailPreview() {
         fullName = "adnamrocoesd/encrypted-push-notification",
         description = "Though shall not read my notifications!",
         ownerAvatarUrl = "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
-        visibility = Visibility.Public,
+        visibility = Visibility.PUBLIC,
         repositoryLink = "https://github.com/abnamrocoesd/encrypted-push-notification"
     )
     GithubExplorerTheme {
