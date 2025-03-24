@@ -1,4 +1,4 @@
-package nl.bluevoid.githubexplorer.data
+package nl.bluevoid.githubexplorer.data.remote
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -10,9 +10,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
-import nl.bluevoid.githubexplorer.data.model.Repository
 import kotlinx.serialization.json.Json
-import nl.bluevoid.githubexplorer.domain.model.Repository as DomainRepository
 
 class GitHubDataRemoteRepositoryImpl : GitHubDataRemoteRepository {
 
@@ -29,7 +27,7 @@ class GitHubDataRemoteRepositoryImpl : GitHubDataRemoteRepository {
         }
     }
 
-    override suspend fun getGitHubRepositories(): Result<List<DomainRepository>> {
+    override suspend fun getGitHubRepositories(): Result<List<Repository>> {
         // todo see techdebt.MD, max 100 pages allowed per request as per api documentation
         return getRepositories("abnamrocoesd", 1, 100)
     }
@@ -38,7 +36,7 @@ class GitHubDataRemoteRepositoryImpl : GitHubDataRemoteRepository {
         username: String,
         page: Int,
         perPage: Int
-    ): Result<List<DomainRepository>> {
+    ): Result<List<Repository>> {
         return try {
             val response = client.get("https://api.github.com/users/$username/repos") {
                 parameter("page", page)
@@ -46,8 +44,7 @@ class GitHubDataRemoteRepositoryImpl : GitHubDataRemoteRepository {
                 header(HttpHeaders.Accept, "application/vnd.github.v3+json")
             }
             val repositories = response.body() as List<Repository>
-            val domainRepos = repositories.map { it.toDomainRepository() }
-            Result.success(domainRepos)
+            Result.success(repositories)
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)

@@ -4,24 +4,36 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import nl.bluevoid.githubexplorer.domain.model.Repository
+import nl.bluevoid.githubexplorer.data.GithubRepository
+import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
-import nl.bluevoid.githubexplorer.domain.usecase.GetGithubRepositoriesUsecase
+import nl.bluevoid.githubexplorer.domain.util.NetworkMonitor
 import nl.bluevoid.githubexplorer.domain.util.ResultState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesUsecase) : ViewModel(),
+class ExplorerViewmodel(
+    private val githubRepository: GithubRepository,
+    private val networkMonitor: NetworkMonitor
+) : ViewModel(),
     OverviewScreenInteractor,
     RepositoryDetailViewInteractor {
 
     private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 
-    val uiState = combine(getGithubDataUsecase.invoke(), selectedRepositoryFlow) { repositoriesLoadResult, selected ->
+    private val networkFlow = networkMonitor.getNetworkAvailabilityFlow()
+        .shareIn(viewModelScope, SharingStarted.Eagerly, 1)
+
+    val uiState = combine(githubRepository.getRepositoriesFlow(),
+        selectedRepositoryFlow) { repositoriesLoadResult, selected ->
         when (repositoriesLoadResult) {
             is ResultState.Loading -> UiState.Overview.OverviewLoading
             is ResultState.Failure -> UiState.Overview.OverviewLoadingError
@@ -35,8 +47,16 @@ class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesU
     private val _navigationEvents = MutableSharedFlow<NavigationEvent>(extraBufferCapacity = 1)
     val navigationEvents = _navigationEvents.asSharedFlow()
 
+    init {
+        viewModelScope.launch {
+            networkFlow.distinctUntilChanged().collect {
+                githubRepository.reload(it)
+            }
+        }
+    }
+
     private fun getSelectedState(
-        repositories: List<Repository>,
+        repositories: List<DomainRepository>,
         selected: RepositoryId?
     ): UiState {
         // list of repositories is small, no fast search needed for now
@@ -51,7 +71,10 @@ class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesU
     }
 
     override fun onRetryLoading() {
-        getGithubDataUsecase.fetchData()
+        viewModelScope.launch {
+            val isNetworkAvailable = networkFlow.last()
+            githubRepository.reload(isNetworkAvailable)
+        }
     }
 
     override fun showDetails(id: RepositoryId) {
@@ -62,7 +85,7 @@ class ExplorerViewmodel(private val getGithubDataUsecase: GetGithubRepositoriesU
         selectedRepositoryFlow.value = null
     }
 
-    override fun openInBrowser(repository: Repository) {
+    override fun openInBrowser(repository: DomainRepository) {
         try {
             _navigationEvents.tryEmit(NavigationEvent.OpenInAppBrowser(repository.repositoryLink.toUri()))
         } catch (e: Exception) {

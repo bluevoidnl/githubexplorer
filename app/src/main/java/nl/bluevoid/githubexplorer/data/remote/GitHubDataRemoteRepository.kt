@@ -1,8 +1,5 @@
-package nl.bluevoid.githubexplorer.data
-
-import nl.bluevoid.githubexplorer.domain.model.Repository
+package nl.bluevoid.githubexplorer.data.remote
 
 interface GitHubDataRemoteRepository {
-
     suspend fun getGitHubRepositories(): Result<List<Repository>>
 }

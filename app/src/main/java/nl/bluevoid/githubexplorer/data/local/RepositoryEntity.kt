@@ -1,25 +1,26 @@
-package nl.bluevoid.githubexplorer.data.model
+package nl.bluevoid.githubexplorer.data.local
 
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
-import kotlinx.serialization.Serializable
-import nl.bluevoid.githubexplorer.domain.model.Repository as DomainRepository
 
-@Serializable
-data class Repository(
-    val id: Long,
+@Entity(tableName = "repositories")
+data class RepositoryEntity(
+    @PrimaryKey val id: Long,
     val name: String,
     val full_name: String,
-    val description: String? = null,
+    val description: String?,
     val html_url: String,
     val visibility: String,
-    val owner: Owner
+    @Embedded val owner: OwnerEntity
 ) {
-    fun toDomainRepository(): DomainRepository {
-        val visEnum = try {
+    fun toDomain(): DomainRepository {
+        val visibilityEnum = try {
             Visibility.valueOf(visibility.uppercase())
         } catch (e: Exception) {
-            println("RRR unknown: $visibility")
             Visibility.UNKNOWN
         }
 
@@ -29,13 +30,13 @@ data class Repository(
             fullName = full_name,
             description = description,
             repositoryLink = html_url,
-            visibility = visEnum,
+            visibility = visibilityEnum,
             ownerAvatarUrl = owner.avatar_url
         )
     }
 }
 
-@Serializable
-data class Owner(
+data class OwnerEntity(
+    val ownerId: Long,
     val avatar_url: String
 )

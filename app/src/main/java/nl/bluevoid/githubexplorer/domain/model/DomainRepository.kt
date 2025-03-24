@@ -1,6 +1,6 @@
 package nl.bluevoid.githubexplorer.domain.model
 
-data class Repository(
+data class DomainRepository(
     val id: RepositoryId,
     val name: String,
     val fullName: String,

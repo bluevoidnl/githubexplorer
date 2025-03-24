@@ -1,8 +1,8 @@
 package nl.bluevoid.githubexplorer.presentation
 
-import nl.bluevoid.githubexplorer.domain.model.Repository
+import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 
 interface RepositoryDetailViewInteractor {
     fun closeDetails()
-    fun openInBrowser(repository: Repository)
+    fun openInBrowser(repository: DomainRepository)
 }

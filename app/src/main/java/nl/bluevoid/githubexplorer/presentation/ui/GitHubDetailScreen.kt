@@ -19,7 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import nl.bluevoid.githubexplorer.domain.model.Repository
+import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.presentation.RepositoryDetailViewInteractor
@@ -80,7 +80,7 @@ fun GitHubDetailView(
 @Preview(showBackground = true)
 @Composable
 fun GitHubDetailPreview() {
-    val repository = Repository(
+    val repository = DomainRepository(
         id = RepositoryId(1),
         name = "encrypted-push-notification",
         fullName = "adnamrocoesd/encrypted-push-notification",
@@ -98,5 +98,5 @@ fun GitHubDetailPreview() {
 
 private val DummyInteraction = object : RepositoryDetailViewInteractor {
     override fun closeDetails() = Unit
-    override fun openInBrowser(repository: Repository) = Unit
+    override fun openInBrowser(repository: DomainRepository) = Unit
 }

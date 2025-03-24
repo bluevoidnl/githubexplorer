@@ -1,14 +1,14 @@
 package nl.bluevoid.githubexplorer
 
 import io.mockk.coEvery
-import io.mockk.every
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import java.io.IOException
-import nl.bluevoid.githubexplorer.domain.model.Repository
+import nl.bluevoid.githubexplorer.data.GithubRepository
+import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
-import nl.bluevoid.githubexplorer.domain.usecase.GetGithubRepositoriesUsecase
+import nl.bluevoid.githubexplorer.domain.util.NetworkMonitor
 import nl.bluevoid.githubexplorer.domain.util.ResultState
 import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
 import nl.bluevoid.githubexplorer.presentation.UiState
@@ -22,12 +22,14 @@ import app.cash.turbine.test as testFlow
 
 class ViewmodelTest {
 
-    // Mock Repository
-    private val gitHubUseCase = mockk<GetGithubRepositoriesUsecase>()
+    private val gitHubRepository = mockk<GithubRepository>()
+    private val netwerkMonitor = mockk<NetworkMonitor>()
 
     @Before
     fun setup() {
-        coEvery { gitHubUseCase.invoke() } returns MutableStateFlow(ResultState.Success(TEST_ITEMS))
+        coEvery { gitHubRepository.getRepositoriesFlow() } returns MutableStateFlow(ResultState.Success(TEST_ITEMS))
+        coEvery { gitHubRepository.reload(any()) } returns Unit
+        coEvery { netwerkMonitor.getNetworkAvailabilityFlow() } returns MutableStateFlow(true)
     }
 
     @Test
@@ -59,7 +61,8 @@ class ViewmodelTest {
     @Test
     fun `when data retrieval fails then viewmodel should return loading error state`() = runTest {
         // Given
-        coEvery { gitHubUseCase.invoke() } returns MutableStateFlow(ResultState.Failure(IOException("In outer space")))
+        coEvery { gitHubRepository.getRepositoriesFlow() } returns MutableStateFlow(
+            ResultState.Failure(IOException("In outer space")))
 
         val vm = getViewModel()
 
@@ -76,19 +79,19 @@ class ViewmodelTest {
     }
 
     @Test
-    fun `Given data retrieval failed when user reloads then usecase should reload data`() {
+    fun `Given data retrieval failed when user reloads then usecase should reload data`()=runTest {
         // Given
-        coEvery { gitHubUseCase.invoke() } returns MutableStateFlow(ResultState.Failure(IOException("In outer space")))
-        every { gitHubUseCase.fetchData() } returns Unit
+        coEvery { gitHubRepository.getRepositoriesFlow() } returns MutableStateFlow(
+            ResultState.Failure(IOException("In outer space")))
+        coEvery { gitHubRepository.reload(any()) } returns Unit
         val vm = getViewModel()
         // wait till error is received
-        // val flowWithOverviewError = vm.uiState.filter { it is UiState.Overview.OverviewLoadingError }
 
         // When
         vm.onRetryLoading()
 
         // Then
-        verify(exactly = 1) { gitHubUseCase.fetchData() }
+        coVerify(exactly = 1) { gitHubRepository.reload(any()) }
     }
 
     @Test
@@ -128,12 +131,12 @@ class ViewmodelTest {
         }
 
     private fun getViewModel(): ExplorerViewmodel {
-        return ExplorerViewmodel(gitHubUseCase)
+        return ExplorerViewmodel(gitHubRepository, netwerkMonitor)
     }
 
     companion object {
 
-        private val REPOSITORY_1 = Repository(
+        private val REPOSITORY_1 = DomainRepository(
             id = RepositoryId(1),
             name = "1",
             fullName = "One for real",
@@ -143,7 +146,7 @@ class ViewmodelTest {
             repositoryLink = "https://github.com/one"
         )
 
-        private val REPOSITORY_2 = Repository(
+        private val REPOSITORY_2 = DomainRepository(
             id = RepositoryId(2),
             name = "2",
             fullName = "Two for real",

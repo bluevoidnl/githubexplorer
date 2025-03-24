@@ -22,7 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import nl.bluevoid.githubexplorer.domain.model.Repository
+import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteractor
@@ -137,7 +137,7 @@ fun GitHubListViewPreview() {
     }
 }
 
-private val repository = Repository(
+private val repository = DomainRepository(
     id = RepositoryId(1),
     name = "encrypted-push-notification",
     fullName = "adnamrocoesd/encrypted-push-notification",
@@ -147,7 +147,7 @@ private val repository = Repository(
     repositoryLink = "https://github.com/abnamrocoesd/encrypted-push-notification"
 )
 
-private val repository2 = Repository(
+private val repository2 = DomainRepository(
     id = RepositoryId(2),
     name = "external-storage",
     fullName = "adnamrocoesd/external-storage",
