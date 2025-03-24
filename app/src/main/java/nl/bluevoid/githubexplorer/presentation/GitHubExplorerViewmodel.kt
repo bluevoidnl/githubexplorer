@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import nl.bluevoid.githubexplorer.data.GithubRepository
+import nl.bluevoid.githubexplorer.data.GitHubRepository
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.util.NetworkMonitor
@@ -20,8 +20,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ExplorerViewmodel(
-    private val githubRepository: GithubRepository,
+class GitHubExplorerViewmodel(
+    private val githubRepository: GitHubRepository,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel(),
     OverviewScreenInteractor,

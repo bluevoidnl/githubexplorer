@@ -4,13 +4,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import java.io.IOException
-import nl.bluevoid.githubexplorer.data.GithubRepository
+import nl.bluevoid.githubexplorer.data.GitHubRepository
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.domain.util.NetworkMonitor
 import nl.bluevoid.githubexplorer.domain.util.ResultState
-import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
+import nl.bluevoid.githubexplorer.presentation.GitHubExplorerViewmodel
 import nl.bluevoid.githubexplorer.presentation.UiState
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -22,7 +22,7 @@ import app.cash.turbine.test as testFlow
 
 class ViewmodelTest {
 
-    private val gitHubRepository = mockk<GithubRepository>()
+    private val gitHubRepository = mockk<GitHubRepository>()
     private val netwerkMonitor = mockk<NetworkMonitor>()
 
     @Before
@@ -85,7 +85,6 @@ class ViewmodelTest {
             ResultState.Failure(IOException("In outer space")))
         coEvery { gitHubRepository.reload(any()) } returns Unit
         val vm = getViewModel()
-        // wait till error is received
 
         // When
         vm.onRetryLoading()
@@ -130,8 +129,8 @@ class ViewmodelTest {
             }
         }
 
-    private fun getViewModel(): ExplorerViewmodel {
-        return ExplorerViewmodel(gitHubRepository, netwerkMonitor)
+    private fun getViewModel(): GitHubExplorerViewmodel {
+        return GitHubExplorerViewmodel(gitHubRepository, netwerkMonitor)
     }
 
     companion object {

@@ -9,7 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import nl.bluevoid.githubexplorer.presentation.ExplorerViewmodel
+import nl.bluevoid.githubexplorer.presentation.GitHubExplorerViewmodel
 import nl.bluevoid.githubexplorer.presentation.NavigationEvent
 import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.GitHubDetailView
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: ExplorerViewmodel by viewModel()
+    private val viewModel: GitHubExplorerViewmodel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

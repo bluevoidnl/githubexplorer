@@ -11,18 +11,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class GithubRepository(
+class GithubRepositoryImpl(
     private val remoteRepository: GitHubDataRemoteRepository,
     private val repositoryDao: RepositoryDao
-) {
+): GitHubRepository {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private val repositoriesFlow = MutableStateFlow<ResultState<List<DomainRepository>>>(ResultState.Loading)
 
-    fun getRepositoriesFlow() = repositoriesFlow.asStateFlow()
+    override fun getRepositoriesFlow() = repositoriesFlow.asStateFlow()
 
-    suspend fun reload(networkAvailable: Boolean) {
+    override suspend fun reload(networkAvailable: Boolean) {
         repositoriesFlow.value = ResultState.Loading
         repositoriesFlow.value = if (networkAvailable) {
             fetchAndStore()
