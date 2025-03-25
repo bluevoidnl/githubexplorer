@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.model.Url
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.presentation.RepositoryDetailViewInteractor
 import nl.bluevoid.githubexplorer.presentation.UiState
@@ -63,7 +64,7 @@ fun GitHubDetailView(
                 .padding(16.dp),
         ) {
             with(repository) {
-                AvatarImage(imageUrl = ownerAvatarUrl, size = 150.dp)
+                AvatarImage(imageUrl = ownerAvatarUrl.url, size = 150.dp)
                 Text("Full name: $fullName")
                 Text("Description: ${description ?: ""}")
                 Text("Is public: $isPublic")
@@ -85,9 +86,9 @@ fun GitHubDetailPreview() {
         name = "encrypted-push-notification",
         fullName = "adnamrocoesd/encrypted-push-notification",
         description = "Though shall not read my notifications!",
-        ownerAvatarUrl = "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
+        ownerAvatarUrl = Url("https://image.com/anyimage.jpg"),
         visibility = Visibility.PUBLIC,
-        repositoryLink = "https://github.com/abnamrocoesd/encrypted-push-notification"
+        repositoryLink = Url("https://github.com/abnamrocoesd/encrypted-push-notification")
     )
     GithubExplorerTheme {
         GitHubDetailView(

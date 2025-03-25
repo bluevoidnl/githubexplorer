@@ -9,6 +9,7 @@ import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.domain.util.NetworkMonitor
 import nl.bluevoid.githubexplorer.domain.util.ResultState
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -29,29 +29,39 @@ class GitHubExplorerViewmodel(
 
     private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 
-    private val networkFlow = networkMonitor.getNetworkAvailabilityFlow()
-        .shareIn(viewModelScope, SharingStarted.Eagerly, 1)
+    private val networkFlow = networkMonitor.getNetworkAvailabilityFlow().distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val uiState = combine(githubRepository.getRepositoriesFlow(),
         selectedRepositoryFlow) { repositoriesLoadResult, selected ->
-        when (repositoriesLoadResult) {
-            is ResultState.Loading -> UiState.Overview.OverviewLoading
-            is ResultState.Failure -> UiState.Overview.OverviewLoadingError
-            is ResultState.Success -> {
-                if (selected == null) UiState.Overview.OverviewItems(repositoriesLoadResult.data)
-                else getSelectedState(repositoriesLoadResult.data, selected)
-            }
-        }
+        mapUiState(repositoriesLoadResult, selected)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Overview.OverviewLoading)
 
     private val _navigationEvents = MutableSharedFlow<NavigationEvent>(extraBufferCapacity = 1)
     val navigationEvents = _navigationEvents.asSharedFlow()
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        // Log or handle exceptions globally
+        throwable.printStackTrace()
+    }
+
     init {
-        viewModelScope.launch {
-            networkFlow.distinctUntilChanged().collect {
+        viewModelScope.launch(exceptionHandler) {
+            networkFlow.collect {
                 githubRepository.reload(it)
             }
+        }
+    }
+
+    private fun mapUiState(
+        repositoriesLoadResult: ResultState<List<DomainRepository>>,
+        selected: RepositoryId?
+    ) = when (repositoriesLoadResult) {
+        is ResultState.Loading -> UiState.Overview.OverviewLoading
+        is ResultState.Failure -> UiState.Overview.OverviewLoadingError
+        is ResultState.Success -> {
+            if (selected == null) UiState.Overview.OverviewItems(repositoriesLoadResult.data)
+            else getSelectedState(repositoriesLoadResult.data, selected)
         }
     }
 
@@ -71,7 +81,7 @@ class GitHubExplorerViewmodel(
     }
 
     override fun onRetryLoading() {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             val isNetworkAvailable = networkFlow.last()
             githubRepository.reload(isNetworkAvailable)
         }
@@ -87,7 +97,8 @@ class GitHubExplorerViewmodel(
 
     override fun openInBrowser(repository: DomainRepository) {
         try {
-            _navigationEvents.tryEmit(NavigationEvent.OpenInAppBrowser(repository.repositoryLink.toUri()))
+            val uri = repository.repositoryLink.url.toUri()
+            _navigationEvents.tryEmit(NavigationEvent.OpenInAppBrowser(uri))
         } catch (e: Exception) {
             // todo handle incorrect urls
             e.printStackTrace()

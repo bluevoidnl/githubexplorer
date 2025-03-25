@@ -1,6 +1,7 @@
 package nl.bluevoid.githubexplorer.di
 
 import androidx.room.Room
+import nl.bluevoid.githubexplorer.data.GitHubRepository
 import nl.bluevoid.githubexplorer.data.GithubRepositoryImpl
 import nl.bluevoid.githubexplorer.data.local.RepositoryDatabase
 import nl.bluevoid.githubexplorer.data.remote.GitHubDataRemoteRepository
@@ -23,7 +24,7 @@ val appModule = module {
 
     single { get<RepositoryDatabase>().repositoryDao() }
 
-    single { GithubRepositoryImpl(get(), get()) }
+    single<GitHubRepository> { GithubRepositoryImpl(get(), get()) }
 
     single { NetworkMonitor(androidContext()) }
 

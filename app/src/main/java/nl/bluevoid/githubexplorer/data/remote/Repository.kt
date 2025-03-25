@@ -4,6 +4,7 @@ import nl.bluevoid.githubexplorer.data.local.OwnerEntity
 import nl.bluevoid.githubexplorer.data.local.RepositoryEntity
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.model.Url
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import kotlinx.serialization.Serializable
 
@@ -29,9 +30,9 @@ data class Repository(
             name = name,
             fullName = full_name,
             description = description,
-            repositoryLink = html_url,
+            repositoryLink = Url(html_url),
             visibility = visEnum,
-            ownerAvatarUrl = owner.avatar_url
+            ownerAvatarUrl = Url(owner.avatar_url)
         )
     }
 

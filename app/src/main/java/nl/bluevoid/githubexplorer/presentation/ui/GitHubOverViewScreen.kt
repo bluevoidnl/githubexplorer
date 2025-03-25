@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.model.Url
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteractor
 import nl.bluevoid.githubexplorer.presentation.UiState
@@ -91,7 +92,7 @@ fun GitHubListView(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 with(repository) {
-                    AvatarImage(imageUrl = ownerAvatarUrl, size = 80.dp)
+                    AvatarImage(imageUrl = ownerAvatarUrl.url, size = 80.dp)
                     Column {
                         Text("${index + 1}. $name")
                         Text("Visibility: ${visibility.name.lowercase()}")
@@ -142,9 +143,9 @@ private val repository = DomainRepository(
     name = "encrypted-push-notification",
     fullName = "adnamrocoesd/encrypted-push-notification",
     description = "Though shall not read my notifications!",
-    ownerAvatarUrl = "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
+    ownerAvatarUrl = Url("https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg"),
     visibility = Visibility.PUBLIC,
-    repositoryLink = "https://github.com/abnamrocoesd/encrypted-push-notification"
+    repositoryLink = Url("https://github.com/abnamrocoesd/encrypted-push-notification")
 )
 
 private val repository2 = DomainRepository(
@@ -152,9 +153,9 @@ private val repository2 = DomainRepository(
     name = "external-storage",
     fullName = "adnamrocoesd/external-storage",
     description = "",
-    ownerAvatarUrl = "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
+    ownerAvatarUrl = Url("https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg"),
     visibility = Visibility.PUBLIC,
-    repositoryLink = "https://github.com/abnamrocoesd/external-storage"
+    repositoryLink =Url( "https://github.com/abnamrocoesd/external-storage")
 )
 
 private val DummyInteraction = object : OverviewScreenInteractor {

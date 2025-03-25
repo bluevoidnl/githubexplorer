@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.model.Url
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 
 @Entity(tableName = "repositories")
@@ -29,9 +30,9 @@ data class RepositoryEntity(
             name = name,
             fullName = full_name,
             description = description,
-            repositoryLink = html_url,
+            repositoryLink = Url(html_url),
             visibility = visibilityEnum,
-            ownerAvatarUrl = owner.avatar_url
+            ownerAvatarUrl = Url(owner.avatar_url)
         )
     }
 }

@@ -7,6 +7,7 @@ import java.io.IOException
 import nl.bluevoid.githubexplorer.data.GitHubRepository
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
+import nl.bluevoid.githubexplorer.domain.model.Url
 import nl.bluevoid.githubexplorer.domain.model.Visibility
 import nl.bluevoid.githubexplorer.domain.util.NetworkMonitor
 import nl.bluevoid.githubexplorer.domain.util.ResultState
@@ -140,9 +141,9 @@ class ViewmodelTest {
             name = "1",
             fullName = "One for real",
             description = "One for real",
-            ownerAvatarUrl = "ownerAvatarUrlOne",
+            ownerAvatarUrl = Url("ownerAvatarUrlOne"),
             visibility = Visibility.PUBLIC,
-            repositoryLink = "https://github.com/one"
+            repositoryLink = Url("https://github.com/one")
         )
 
         private val REPOSITORY_2 = DomainRepository(
@@ -150,9 +151,9 @@ class ViewmodelTest {
             name = "2",
             fullName = "Two for real",
             description = "Two for real",
-            ownerAvatarUrl = "ownerAvatarUrlTwo",
+            ownerAvatarUrl = Url("ownerAvatarUrlTwo"),
             visibility = Visibility.PRIVATE,
-            repositoryLink = "https://github.com/two"
+            repositoryLink = Url("https://github.com/two")
         )
 
         val TEST_ITEMS = listOf(REPOSITORY_1, REPOSITORY_2)

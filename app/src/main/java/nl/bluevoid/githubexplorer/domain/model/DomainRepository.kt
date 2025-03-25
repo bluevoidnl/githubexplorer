@@ -5,15 +5,18 @@ data class DomainRepository(
     val name: String,
     val fullName: String,
     val description: String? = null,
-    val ownerAvatarUrl: String,
+    val ownerAvatarUrl: Url,
     val visibility: Visibility,
-    val repositoryLink: String
+    val repositoryLink: Url
 ) {
     val isPublic = visibility == Visibility.PUBLIC
 }
 
 @JvmInline
 value class RepositoryId(val id: Long)
+
+@JvmInline
+value class Url(val url: String)
 
 enum class Visibility {
     PUBLIC, PRIVATE, INTERNAL, UNKNOWN
