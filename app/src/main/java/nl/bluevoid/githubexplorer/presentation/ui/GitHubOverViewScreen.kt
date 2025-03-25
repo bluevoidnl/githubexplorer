@@ -86,7 +86,10 @@ fun GitHubListView(
     modifier: Modifier = Modifier, uiState: UiState.Overview.OverviewItems,
     overviewScreenInteractor: OverviewScreenInteractor
 ) {
-    LazyColumn(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(
+        modifier = modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         itemsIndexed(uiState.items) { index, repository ->
             Row(modifier = Modifier.clickable { overviewScreenInteractor.showDetails(repository.id) },
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -155,7 +158,7 @@ private val repository2 = DomainRepository(
     description = "",
     ownerAvatarUrl = Url("https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg"),
     visibility = Visibility.PUBLIC,
-    repositoryLink =Url( "https://github.com/abnamrocoesd/external-storage")
+    repositoryLink = Url("https://github.com/abnamrocoesd/external-storage")
 )
 
 private val DummyInteraction = object : OverviewScreenInteractor {
