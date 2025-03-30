@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -30,7 +31,6 @@ import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteractor
 import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GitHubOverView(
@@ -39,7 +39,7 @@ fun GitHubOverView(
     overviewScreenInteractor: OverviewScreenInteractor
 ) {
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("ANB AMRO Github Explorer") },
@@ -56,66 +56,88 @@ fun GitHubOverView(
                 .padding(innerPadding),
         ) {
             when (uiState) {
-                is UiState.Overview.OverviewLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) { CircularProgressIndicator() }
-                }
-
+                is UiState.Overview.OverviewLoading -> LoadingView()
                 is UiState.Overview.OverviewItems -> GitHubListView(modifier, uiState, overviewScreenInteractor)
-                is UiState.Overview.OverviewLoadingError ->
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Something went wrong,\n please try again")
-                            Button(onClick = { overviewScreenInteractor.onRetryLoading() }) {
-                                Text("Retry")
-                            }
-                        }
-                    }
+                is UiState.Overview.OverviewLoadingError -> LoadingErrorView() {
+                    overviewScreenInteractor.onRetryLoading()
+                }
             }
         }
     }
 }
 
 @Composable
-fun GitHubListView(
-    modifier: Modifier = Modifier, uiState: UiState.Overview.OverviewItems,
-    overviewScreenInteractor: OverviewScreenInteractor
+private fun LoadingErrorView(
+    modifier: Modifier = Modifier,
+    message: String = "Something went wrong,\n please try again.",
+    onRetryClick: () -> Unit,
 ) {
-    LazyColumn(
-        modifier = modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        itemsIndexed(uiState.items) { index, repository ->
-            Row(modifier = Modifier.clickable { overviewScreenInteractor.showDetails(repository.id) },
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                with(repository) {
-                    AvatarImage(imageUrl = ownerAvatarUrl.url, size = 80.dp)
-                    Column {
-                        Text("${index + 1}. $name")
-                        Text("Visibility: ${visibility.name.lowercase()}")
-                        Text("Is public: $isPublic")
-                    }
-                }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(message)
+            Button(onClick = { onRetryClick() }) {
+                Text("Retry")
             }
         }
     }
 }
 
+@Composable
+private fun LoadingView(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) { CircularProgressIndicator() }
+}
+
+@Composable
+fun GitHubListView(
+    modifier: Modifier = Modifier,
+    uiState: UiState.Overview.OverviewItems,
+    overviewScreenInteractor: OverviewScreenInteractor
+) {
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        itemsIndexed(uiState.items) { index, repository ->
+            RepositoryItem(index = index, repository = repository) { id ->
+                overviewScreenInteractor.showDetails(id)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RepositoryItem(
+    modifier: Modifier = Modifier,
+    index: Int,
+    repository: DomainRepository,
+    onClick: (RepositoryId) -> Unit
+) {
+    Row(modifier = modifier.clickable { onClick(repository.id) },
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        with(repository) {
+            AvatarImage(imageUrl = ownerAvatarUrl.url, size = 80.dp)
+            Column {
+                Text("${index + 1}. $name")
+                Text("Visibility: ${visibility.name.lowercase()}")
+                Text("Is public: $isPublic")
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun GitHubOverViewLoadingPreview() {
     GithubExplorerTheme {
-        GitHubOverView(
-            uiState = UiState.Overview.OverviewLoading,
-            overviewScreenInteractor = DummyInteraction
-        )
+        LoadingView()
     }
 }
 
@@ -123,10 +145,18 @@ fun GitHubOverViewLoadingPreview() {
 @Composable
 fun GitHubOverViewErrorPreview() {
     GithubExplorerTheme {
-        GitHubOverView(
-            uiState = UiState.Overview.OverviewLoadingError,
-            overviewScreenInteractor = DummyInteraction
-        )
+        LoadingErrorView() {}
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RepositoryItemPreview() {
+    GithubExplorerTheme {
+        RepositoryItem(
+            index = 1,
+            repository = repository,
+        ) {}
     }
 }
 
