@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Github Explorer</string>
+    <string name="back">Back</string>
+    <string name="view_repository">View repository</string>
+    <string name="something_went_wrong_please_try_again">Something went wrong,\n please try again.</string>
+    <string name="github_explorer_title">ANB AMRO Github Explorer</string>
+    <string name="visibility">Visibility: %1$s</string>
+    <string name="is_public">Is public: %1$s</string>
+    <string name="description">Description: %1$s</string>
+    <string name="full_name">Full name: %1$s</string>
+    <string name="repository">Repository: %1$s</string>
+    <string name="retry">Retry</string>
 </resources>

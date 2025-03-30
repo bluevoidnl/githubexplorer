@@ -18,8 +18,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import nl.bluevoid.githubexplorer.R
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.presentation.RepositoryDetailViewInteraction
 import nl.bluevoid.githubexplorer.presentation.UiState
@@ -40,7 +42,7 @@ fun GitHubDetailView(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Repository: ${repository.name}") },
+                title = { Text(stringResource(R.string.repository, repository.name)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -49,7 +51,7 @@ fun GitHubDetailView(
                     IconButton(onClick = { interaction.closeDetails() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -76,13 +78,13 @@ private fun DetailView(
     ) {
         with(repository) {
             AvatarImage(imageUrl = ownerAvatarUrl.url, size = 150.dp)
-            Text("Full name: $fullName")
-            Text("Description: ${description ?: ""}")
-            Text("Is public: $isPublic")
-            Text("Visibility: ${visibility.name.lowercase()}")
+            Text(stringResource(R.string.full_name, fullName))
+            Text(stringResource(R.string.description, description ?: ""))
+            Text(stringResource(R.string.is_public, isPublic))
+            Text(stringResource(R.string.visibility, visibility.name.lowercase()))
 
             Button(onClick = { onOpenInBrowserClick(repository) }) {
-                Text("View repository")
+                Text(stringResource(R.string.view_repository))
             }
         }
     }
@@ -104,12 +106,10 @@ fun GitHubDetailPreview() {
     val repository = PreviewData.REPOSITORY
     GithubExplorerTheme {
         GitHubDetailView(
-            uiState = UiState.Detail(repository), interaction = DummyInteraction
+            uiState = UiState.Detail(repository), interaction = object : RepositoryDetailViewInteraction {
+                override fun closeDetails() = Unit
+                override fun openInBrowser(repository: DomainRepository) = Unit
+            }
         )
     }
-}
-
-private val DummyInteraction = object : RepositoryDetailViewInteraction {
-    override fun closeDetails() = Unit
-    override fun openInBrowser(repository: DomainRepository) = Unit
 }

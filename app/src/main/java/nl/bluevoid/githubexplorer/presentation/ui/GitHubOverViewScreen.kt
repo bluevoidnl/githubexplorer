@@ -21,8 +21,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import nl.bluevoid.githubexplorer.R
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteraction
@@ -40,7 +42,7 @@ fun GitHubOverView(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("ANB AMRO Github Explorer") },
+                title = { Text(stringResource(R.string.github_explorer_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -67,7 +69,7 @@ fun GitHubOverView(
 @Composable
 private fun LoadingErrorView(
     modifier: Modifier = Modifier,
-    message: String = "Something went wrong,\n please try again.",
+    message: String = stringResource(R.string.something_went_wrong_please_try_again),
     onRetryClick: () -> Unit,
 ) {
     Box(
@@ -77,7 +79,7 @@ private fun LoadingErrorView(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(message)
             Button(onClick = { onRetryClick() }) {
-                Text("Retry")
+                Text(stringResource(R.string.retry))
             }
         }
     }
@@ -125,8 +127,8 @@ private fun RepositoryItem(
             AvatarImage(imageUrl = ownerAvatarUrl.url, size = 80.dp)
             Column {
                 Text("${index + 1}. $name")
-                Text("Visibility: ${visibility.name.lowercase()}")
-                Text("Is public: $isPublic")
+                Text(stringResource(R.string.visibility, visibility.name.lowercase()))
+                Text(stringResource(R.string.is_public, isPublic))
             }
         }
     }
@@ -165,12 +167,11 @@ fun GitHubListViewPreview() {
     GithubExplorerTheme {
         GitHubListView(
             uiState = UiState.Overview.OverviewItems(PreviewData.REPOSITORY_ITEMS),
-            overviewScreenInteraction = DummyInteraction
+            overviewScreenInteraction = object : OverviewScreenInteraction {
+                override fun onRetryLoading() = Unit
+                override fun showDetails(id: RepositoryId) = Unit
+            }
         )
     }
 }
 
-private val DummyInteraction = object : OverviewScreenInteraction {
-    override fun onRetryLoading() = Unit
-    override fun showDetails(id: RepositoryId) = Unit
-}
