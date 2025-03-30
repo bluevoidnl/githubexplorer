@@ -24,8 +24,8 @@ class GitHubExplorerViewmodel(
     private val githubRepository: GitHubRepository,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel(),
-    OverviewScreenInteractor,
-    RepositoryDetailViewInteractor {
+    OverviewScreenInteraction,
+    RepositoryDetailViewInteraction {
 
     private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 

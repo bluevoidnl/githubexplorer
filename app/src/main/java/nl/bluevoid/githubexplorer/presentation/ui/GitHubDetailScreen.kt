@@ -1,6 +1,7 @@
 package nl.bluevoid.githubexplorer.presentation.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,25 +21,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
-import nl.bluevoid.githubexplorer.domain.model.RepositoryId
-import nl.bluevoid.githubexplorer.domain.model.Url
-import nl.bluevoid.githubexplorer.domain.model.Visibility
-import nl.bluevoid.githubexplorer.presentation.RepositoryDetailViewInteractor
+import nl.bluevoid.githubexplorer.presentation.RepositoryDetailViewInteraction
 import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GitHubDetailView(
+    modifier: Modifier = Modifier,
     uiState: UiState.Detail,
-    interactor: RepositoryDetailViewInteractor
+    interaction: RepositoryDetailViewInteraction
 ) {
     val repository = uiState.selectedRepository
 
-    BackHandler(onBack = { interactor.closeDetails() })
+    BackHandler(onBack = { interaction.closeDetails() })
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Repository: ${repository.name}") },
@@ -47,7 +46,7 @@ fun GitHubDetailView(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 navigationIcon = {
-                    IconButton(onClick = { interactor.closeDetails() }) {
+                    IconButton(onClick = { interaction.closeDetails() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = "Back"
@@ -57,22 +56,33 @@ fun GitHubDetailView(
             )
         },
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-        ) {
-            with(repository) {
-                AvatarImage(imageUrl = ownerAvatarUrl.url, size = 150.dp)
-                Text("Full name: $fullName")
-                Text("Description: ${description ?: ""}")
-                Text("Is public: $isPublic")
-                Text("Visibility: ${visibility.name.lowercase()}")
+        Box(modifier = Modifier.padding(innerPadding)) {
+            DetailView(
+                repository = repository,
+                onOpenInBrowserClick = interaction::openInBrowser
+            )
+        }
+    }
+}
 
-                Button(onClick = { interactor.openInBrowser(repository) }) {
-                    Text("View repository")
-                }
+@Composable
+private fun DetailView(
+    modifier: Modifier = Modifier,
+    repository: DomainRepository,
+    onOpenInBrowserClick: (DomainRepository) -> Unit,
+) {
+    Column(
+        modifier = modifier.padding(16.dp),
+    ) {
+        with(repository) {
+            AvatarImage(imageUrl = ownerAvatarUrl.url, size = 150.dp)
+            Text("Full name: $fullName")
+            Text("Description: ${description ?: ""}")
+            Text("Is public: $isPublic")
+            Text("Visibility: ${visibility.name.lowercase()}")
+
+            Button(onClick = { onOpenInBrowserClick(repository) }) {
+                Text("View repository")
             }
         }
     }
@@ -80,24 +90,26 @@ fun GitHubDetailView(
 
 @Preview(showBackground = true)
 @Composable
+fun DetailViewPreview() {
+    GithubExplorerTheme {
+        DetailView(repository = PreviewData.REPOSITORY) {
+
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
 fun GitHubDetailPreview() {
-    val repository = DomainRepository(
-        id = RepositoryId(1),
-        name = "encrypted-push-notification",
-        fullName = "adnamrocoesd/encrypted-push-notification",
-        description = "Though shall not read my notifications!",
-        ownerAvatarUrl = Url("https://image.com/anyimage.jpg"),
-        visibility = Visibility.PUBLIC,
-        repositoryLink = Url("https://github.com/abnamrocoesd/encrypted-push-notification")
-    )
+    val repository = PreviewData.REPOSITORY
     GithubExplorerTheme {
         GitHubDetailView(
-            uiState = UiState.Detail(repository), DummyInteraction
+            uiState = UiState.Detail(repository), interaction = DummyInteraction
         )
     }
 }
 
-private val DummyInteraction = object : RepositoryDetailViewInteractor {
+private val DummyInteraction = object : RepositoryDetailViewInteraction {
     override fun closeDetails() = Unit
     override fun openInBrowser(repository: DomainRepository) = Unit
 }

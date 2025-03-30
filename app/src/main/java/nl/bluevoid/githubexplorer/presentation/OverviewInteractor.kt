@@ -2,7 +2,7 @@ package nl.bluevoid.githubexplorer.presentation
 
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
 
-interface OverviewScreenInteractor {
+interface OverviewScreenInteraction {
     fun onRetryLoading()
     fun showDetails(id: RepositoryId)
 }

@@ -25,9 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nl.bluevoid.githubexplorer.domain.model.DomainRepository
 import nl.bluevoid.githubexplorer.domain.model.RepositoryId
-import nl.bluevoid.githubexplorer.domain.model.Url
-import nl.bluevoid.githubexplorer.domain.model.Visibility
-import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteractor
+import nl.bluevoid.githubexplorer.presentation.OverviewScreenInteraction
 import nl.bluevoid.githubexplorer.presentation.UiState
 import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
 
@@ -36,7 +34,7 @@ import nl.bluevoid.githubexplorer.presentation.ui.theme.GithubExplorerTheme
 fun GitHubOverView(
     modifier: Modifier = Modifier,
     uiState: UiState.Overview,
-    overviewScreenInteractor: OverviewScreenInteractor
+    overviewScreenInteraction: OverviewScreenInteraction
 ) {
     Scaffold(
         modifier = modifier,
@@ -57,10 +55,10 @@ fun GitHubOverView(
         ) {
             when (uiState) {
                 is UiState.Overview.OverviewLoading -> LoadingView()
-                is UiState.Overview.OverviewItems -> GitHubListView(modifier, uiState, overviewScreenInteractor)
-                is UiState.Overview.OverviewLoadingError -> LoadingErrorView() {
-                    overviewScreenInteractor.onRetryLoading()
-                }
+                is UiState.Overview.OverviewItems -> GitHubListView(modifier, uiState, overviewScreenInteraction)
+                is UiState.Overview.OverviewLoadingError -> LoadingErrorView(
+                    onRetryClick = overviewScreenInteraction::onRetryLoading)
+
             }
         }
     }
@@ -97,17 +95,18 @@ private fun LoadingView(modifier: Modifier = Modifier) {
 fun GitHubListView(
     modifier: Modifier = Modifier,
     uiState: UiState.Overview.OverviewItems,
-    overviewScreenInteractor: OverviewScreenInteractor
+    overviewScreenInteraction: OverviewScreenInteraction
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(16.dp),
     ) {
-        itemsIndexed(uiState.items) { index, repository ->
-            RepositoryItem(index = index, repository = repository) { id ->
-                overviewScreenInteractor.showDetails(id)
-            }
+        itemsIndexed(uiState.items,
+            key = { _, repository -> repository.id.id }) { index, repository ->
+            RepositoryItem(index = index,
+                repository = repository,
+                onClick = overviewScreenInteraction::showDetails)
         }
     }
 }
@@ -155,7 +154,7 @@ fun RepositoryItemPreview() {
     GithubExplorerTheme {
         RepositoryItem(
             index = 1,
-            repository = repository,
+            repository = PreviewData.REPOSITORY,
         ) {}
     }
 }
@@ -165,33 +164,13 @@ fun RepositoryItemPreview() {
 fun GitHubListViewPreview() {
     GithubExplorerTheme {
         GitHubListView(
-            uiState = UiState.Overview.OverviewItems(listOf(repository, repository2)),
-            overviewScreenInteractor = DummyInteraction
+            uiState = UiState.Overview.OverviewItems(PreviewData.REPOSITORY_ITEMS),
+            overviewScreenInteraction = DummyInteraction
         )
     }
 }
 
-private val repository = DomainRepository(
-    id = RepositoryId(1),
-    name = "encrypted-push-notification",
-    fullName = "adnamrocoesd/encrypted-push-notification",
-    description = "Though shall not read my notifications!",
-    ownerAvatarUrl = Url("https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg"),
-    visibility = Visibility.PUBLIC,
-    repositoryLink = Url("https://github.com/abnamrocoesd/encrypted-push-notification")
-)
-
-private val repository2 = DomainRepository(
-    id = RepositoryId(2),
-    name = "external-storage",
-    fullName = "adnamrocoesd/external-storage",
-    description = "",
-    ownerAvatarUrl = Url("https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg"),
-    visibility = Visibility.PUBLIC,
-    repositoryLink = Url("https://github.com/abnamrocoesd/external-storage")
-)
-
-private val DummyInteraction = object : OverviewScreenInteractor {
+private val DummyInteraction = object : OverviewScreenInteraction {
     override fun onRetryLoading() = Unit
     override fun showDetails(id: RepositoryId) = Unit
 }

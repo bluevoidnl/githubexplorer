@@ -34,10 +34,10 @@ class MainActivity : ComponentActivity() {
                 when (uiState) {
                     is UiState.Overview -> GitHubOverView(
                         uiState = uiState,
-                        overviewScreenInteractor = viewModel
+                        overviewScreenInteraction = viewModel
                     )
 
-                    is UiState.Detail -> GitHubDetailView(uiState = uiState, interactor = viewModel)
+                    is UiState.Detail -> GitHubDetailView(uiState = uiState, interaction = viewModel)
                 }
             }
         }
