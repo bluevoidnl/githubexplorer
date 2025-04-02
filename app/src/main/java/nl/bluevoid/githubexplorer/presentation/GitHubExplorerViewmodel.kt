@@ -26,16 +26,16 @@ class GitHubExplorerViewmodel(
 ) : ViewModel(),
     OverviewScreenInteraction,
     RepositoryDetailViewInteraction {
-
-    private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
-
+        
     private val networkFlow = networkMonitor.getNetworkAvailabilityFlow().distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    private val selectedRepositoryFlow = MutableStateFlow<RepositoryId?>(null)
 
     val uiState = combine(githubRepository.getRepositoriesFlow(),
         selectedRepositoryFlow) { repositoriesLoadResult, selected ->
         mapUiState(repositoriesLoadResult, selected)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Overview.OverviewLoading)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(2000), UiState.Overview.OverviewLoading)
 
     private val _navigationEvents = MutableSharedFlow<NavigationEvent>(extraBufferCapacity = 1)
     val navigationEvents = _navigationEvents.asSharedFlow()
